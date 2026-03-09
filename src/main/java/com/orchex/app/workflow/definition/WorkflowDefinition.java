@@ -23,10 +23,10 @@ public class WorkflowDefinition {
     @Column(nullable = false, unique = true)
     private String name;
 
+    private String description;
+
     @Column(nullable = false)
     private Integer version;
-
-    private String description;
 
     private Boolean active;
 
