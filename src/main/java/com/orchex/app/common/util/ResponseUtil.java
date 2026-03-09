@@ -1,4 +1,4 @@
-package com.orchex.app.util;
+package com.orchex.app.common.util;
 
 import java.time.LocalDateTime;
 import java.util.Collections;

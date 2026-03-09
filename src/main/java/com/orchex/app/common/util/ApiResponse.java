@@ -1,4 +1,4 @@
-package com.orchex.app.util;
+package com.orchex.app.common.util;
 
 import lombok.Builder;
 import lombok.Getter;

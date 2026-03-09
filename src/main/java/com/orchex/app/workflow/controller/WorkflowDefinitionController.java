@@ -1,7 +1,7 @@
 package com.orchex.app.workflow.controller;
 
-import com.orchex.app.util.ApiResponse;
-import com.orchex.app.util.ResponseUtil;
+import com.orchex.app.common.util.ApiResponse;
+import com.orchex.app.common.util.ResponseUtil;
 import com.orchex.app.workflow.definition.WorkflowDefinition;
 import com.orchex.app.workflow.dto.CreateWorkflowRequest;
 import com.orchex.app.workflow.dto.WorkflowResponse;
