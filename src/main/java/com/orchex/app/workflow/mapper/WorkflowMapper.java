@@ -1,18 +1,27 @@
 package com.orchex.app.workflow.mapper;
 
+import com.orchex.app.workflow.definition.TaskDefinition;
 import com.orchex.app.workflow.definition.WorkflowDefinition;
+import com.orchex.app.workflow.dto.CreateWorkflowRequest;
+import com.orchex.app.workflow.dto.TaskDefinitionRequest;
 import com.orchex.app.workflow.dto.WorkflowResponse;
-import org.springframework.stereotype.Component;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
-@Component
-public class WorkflowMapper {
+@Mapper(componentModel = "spring")
+public interface WorkflowMapper {
 
-    public WorkflowResponse toResponse(WorkflowDefinition workflow) {
-        return WorkflowResponse.builder()
-                .id(workflow.getId())
-                .name(workflow.getName())
-                .description(workflow.getDescription())
-                .version(workflow.getVersion())
-                .build();
+    WorkflowResponse toResponse(WorkflowDefinition workflow);
+
+    WorkflowDefinition toEntity(CreateWorkflowRequest dto);
+
+    TaskDefinition toTaskEntity(TaskDefinitionRequest dto);
+
+    @AfterMapping
+    default void linkTasks(@MappingTarget WorkflowDefinition workflow) {
+        if (workflow.getTasks() != null) {
+            workflow.getTasks().forEach(task -> task.setWorkflowDefinition(workflow));
+        }
     }
 }
