@@ -1,9 +1,12 @@
 package com.orchex.app.workflow.controller;
 
+import com.orchex.app.util.ApiResponse;
+import com.orchex.app.util.ResponseUtil;
 import com.orchex.app.workflow.definition.WorkflowDefinition;
 import com.orchex.app.workflow.dto.CreateWorkflowRequest;
 import com.orchex.app.workflow.dto.WorkflowResponse;
 import com.orchex.app.workflow.service.WorkflowDefinitionService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,14 +24,19 @@ public class WorkflowDefinitionController {
     private final WorkflowDefinitionService workflowDefinitionService;
 
     @PostMapping
-    public ResponseEntity<WorkflowResponse> createWorkflow(@Valid @RequestBody CreateWorkflowRequest request) {
-        WorkflowDefinition createdWorkflow = workflowDefinitionService.createWorkflow(request);
+    public ResponseEntity<ApiResponse<WorkflowResponse>> createWorkflow(
+            @Valid @RequestBody CreateWorkflowRequest createWorkflowRequest,
+            HttpServletRequest httpRequest) {
+        WorkflowDefinition createdWorkflow = workflowDefinitionService.createWorkflow(createWorkflowRequest);
         WorkflowResponse response = WorkflowResponse.builder()
                 .id(createdWorkflow.getId())
                 .name(createdWorkflow.getName())
                 .description(createdWorkflow.getDescription())
                 .version(createdWorkflow.getVersion())
                 .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ResponseUtil.success(response, "Workflow created successfully", httpRequest.getRequestURI()));
     }
 }
