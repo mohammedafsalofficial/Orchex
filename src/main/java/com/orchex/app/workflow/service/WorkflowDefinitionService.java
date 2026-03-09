@@ -40,4 +40,8 @@ public class WorkflowDefinitionService {
 
         return workflowDefinitionRepository.save(workflow);
     }
+
+    public List<WorkflowDefinition> getAllWorkflows() {
+        return workflowDefinitionRepository.findAll();
+    }
 }

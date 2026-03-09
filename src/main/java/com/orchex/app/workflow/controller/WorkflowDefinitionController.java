@@ -12,10 +12,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/workflows")
@@ -33,6 +32,17 @@ public class WorkflowDefinitionController {
         WorkflowResponse response = workflowMapper.toResponse(createdWorkflow);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ResponseUtil.success(response, "Workflow created successfully", httpRequest.getRequestURI()));
+                .body(ResponseUtil.success(response, "Workflow created successfully.", httpRequest.getRequestURI()));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<WorkflowResponse>>> getAllWorkflows(HttpServletRequest httpRequest) {
+        List<WorkflowDefinition> workflows = workflowDefinitionService.getAllWorkflows();
+        List<WorkflowResponse> response = workflows.stream()
+                .map(workflowMapper::toResponse)
+                .toList();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseUtil.success(response, "Workflows fetched successfully.", httpRequest.getRequestURI()));
     }
 }
