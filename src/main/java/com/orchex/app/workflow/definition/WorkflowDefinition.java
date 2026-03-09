@@ -34,4 +34,10 @@ public class WorkflowDefinition {
 
     @OneToMany(mappedBy = "workflowDefinition", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TaskDefinition> tasks;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.active = true;
+    }
 }
