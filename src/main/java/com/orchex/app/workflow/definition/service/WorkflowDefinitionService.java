@@ -1,14 +1,12 @@
-package com.orchex.app.workflow.service;
+package com.orchex.app.workflow.definition.service;
 
-import com.orchex.app.workflow.definition.TaskDefinition;
-import com.orchex.app.workflow.definition.WorkflowDefinition;
-import com.orchex.app.workflow.dto.CreateWorkflowRequest;
-import com.orchex.app.workflow.mapper.WorkflowMapper;
-import com.orchex.app.workflow.repository.WorkflowDefinitionRepository;
+import com.orchex.app.workflow.definition.model.WorkflowDefinition;
+import com.orchex.app.workflow.definition.dto.CreateWorkflowRequest;
+import com.orchex.app.workflow.definition.mapper.WorkflowMapper;
+import com.orchex.app.workflow.definition.repository.WorkflowDefinitionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

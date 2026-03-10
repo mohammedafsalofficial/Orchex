@@ -1,4 +1,4 @@
-package com.orchex.app.execution.model;
+package com.orchex.app.workflow.execution.model;
 
 public enum WorkflowStatus {
 

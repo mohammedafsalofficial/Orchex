@@ -1,4 +1,4 @@
-package com.orchex.app.workflow.dto;
+package com.orchex.app.workflow.definition.dto;
 
 import lombok.Builder;
 
