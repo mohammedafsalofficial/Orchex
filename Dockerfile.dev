@@ -1,10 +1,6 @@
 FROM maven:3.9.6-eclipse-temurin-17
 WORKDIR /app
 
-# Copy pom.xml and download dependencies first (cached layer)
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
 # Source is mounted as a volume at runtime — not copied here
 EXPOSE 8080
 

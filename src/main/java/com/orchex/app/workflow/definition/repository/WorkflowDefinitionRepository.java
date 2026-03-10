@@ -1,6 +1,6 @@
-package com.orchex.app.workflow.repository;
+package com.orchex.app.workflow.definition.repository;
 
-import com.orchex.app.workflow.definition.WorkflowDefinition;
+import com.orchex.app.workflow.definition.model.WorkflowDefinition;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

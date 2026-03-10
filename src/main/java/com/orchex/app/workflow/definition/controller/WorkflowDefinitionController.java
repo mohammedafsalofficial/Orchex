@@ -1,12 +1,12 @@
-package com.orchex.app.workflow.controller;
+package com.orchex.app.workflow.definition.controller;
 
 import com.orchex.app.common.util.ApiResponse;
 import com.orchex.app.common.util.ResponseUtil;
-import com.orchex.app.workflow.definition.WorkflowDefinition;
-import com.orchex.app.workflow.dto.CreateWorkflowRequest;
-import com.orchex.app.workflow.dto.WorkflowResponse;
-import com.orchex.app.workflow.mapper.WorkflowMapper;
-import com.orchex.app.workflow.service.WorkflowDefinitionService;
+import com.orchex.app.workflow.definition.model.WorkflowDefinition;
+import com.orchex.app.workflow.definition.dto.CreateWorkflowRequest;
+import com.orchex.app.workflow.definition.dto.WorkflowResponse;
+import com.orchex.app.workflow.definition.mapper.WorkflowMapper;
+import com.orchex.app.workflow.definition.service.WorkflowDefinitionService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

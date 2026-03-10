@@ -1,4 +1,4 @@
-package com.orchex.app.workflow.dto;
+package com.orchex.app.workflow.definition.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;

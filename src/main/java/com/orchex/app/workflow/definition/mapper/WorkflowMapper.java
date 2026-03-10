@@ -1,10 +1,10 @@
-package com.orchex.app.workflow.mapper;
+package com.orchex.app.workflow.definition.mapper;
 
-import com.orchex.app.workflow.definition.TaskDefinition;
-import com.orchex.app.workflow.definition.WorkflowDefinition;
-import com.orchex.app.workflow.dto.CreateWorkflowRequest;
-import com.orchex.app.workflow.dto.TaskDefinitionRequest;
-import com.orchex.app.workflow.dto.WorkflowResponse;
+import com.orchex.app.workflow.definition.model.TaskDefinition;
+import com.orchex.app.workflow.definition.model.WorkflowDefinition;
+import com.orchex.app.workflow.definition.dto.CreateWorkflowRequest;
+import com.orchex.app.workflow.definition.dto.TaskDefinitionRequest;
+import com.orchex.app.workflow.definition.dto.WorkflowResponse;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

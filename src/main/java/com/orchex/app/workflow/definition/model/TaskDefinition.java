@@ -1,4 +1,4 @@
-package com.orchex.app.workflow.definition;
+package com.orchex.app.workflow.definition.model;
 
 import jakarta.persistence.*;
 import lombok.*;
