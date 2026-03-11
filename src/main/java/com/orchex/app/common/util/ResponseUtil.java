@@ -1,5 +1,7 @@
 package com.orchex.app.common.util;
 
+import com.orchex.app.workflow.definition.exception.ErrorCode;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -12,13 +14,13 @@ public class ResponseUtil {
                 .message(message)
                 .data(data)
                 .errors(null)
-                .errorCode(0)
+                .errorCode(null)
                 .timestamp(LocalDateTime.now())
                 .path(path)
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(List<String> errors, String message, int errorCode, String path) {
+    public static <T> ApiResponse<T> error(List<String> errors, String message, ErrorCode errorCode, String path) {
         return ApiResponse.<T>builder()
                 .success(false)
                 .message(message)
@@ -26,11 +28,11 @@ public class ResponseUtil {
                 .errors(errors)
                 .errorCode(errorCode)
                 .timestamp(LocalDateTime.now())
-                .path(path)
+                .path(path + "/error")
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(String error, String message, int errorCode, String path) {
+    public static <T> ApiResponse<T> error(String error, String message, ErrorCode errorCode, String path) {
         return error(Collections.singletonList(error), message, errorCode, path);
     }
 }
