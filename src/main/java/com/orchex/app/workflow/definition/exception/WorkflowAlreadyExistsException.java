@@ -1,14 +1,17 @@
 package com.orchex.app.workflow.definition.exception;
 
-import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
-@Getter
-public class WorkflowAlreadyExistsException extends RuntimeException {
+import java.util.List;
 
-    private final ErrorCode errorCode;
+public class WorkflowAlreadyExistsException extends AppException {
 
-    public WorkflowAlreadyExistsException(String message) {
-        super(message);
-        this.errorCode = ErrorCode.WORKFLOW_ALREADY_EXISTS;
+    public WorkflowAlreadyExistsException(String workflowName) {
+        super(
+                ErrorCode.WORKFLOW_ALREADY_EXISTS,
+                "Workflow already exists",
+                List.of(String.format("Workflow with name '%s' already exists", workflowName)),
+                HttpStatus.CONFLICT
+        );
     }
 }

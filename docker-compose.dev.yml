@@ -4,26 +4,24 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: orchex_app_dev
-    restart: unless-stopped
+    restart: no
     ports:
       - "8080:8080"
-      - "35729:35729"   # LiveReload port used by Spring DevTools
+      - "35729:35729"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/orchex
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       SPRING_DEVTOOLS_RESTART_ENABLED: "true"
       SPRING_DEVTOOLS_LIVERELOAD_ENABLED: "true"
-      # Force polling — inotify/filesystem events are unreliable over Docker volume mounts
-      SPRING_DEVTOOLS_RESTART_POLL-INTERVAL: 2000
-      SPRING_DEVTOOLS_RESTART_QUIET-PERIOD: 1000
+      SPRING_DEVTOOLS_RESTART_POLL_INTERVAL: "2000"
+      SPRING_DEVTOOLS_RESTART_QUIET_PERIOD: "1000"
     volumes:
-      # Mount full project so Maven can read src/ AND write compiled .class files to target/
       - .:/app
-      # Preserve Maven local repo — avoids re-downloading deps on every restart
       - maven_cache:/root/.m2
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:17
@@ -37,6 +35,11 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d orchex"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
