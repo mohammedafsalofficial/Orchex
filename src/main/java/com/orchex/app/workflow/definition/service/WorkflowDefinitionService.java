@@ -1,5 +1,6 @@
 package com.orchex.app.workflow.definition.service;
 
+import com.orchex.app.workflow.definition.exception.WorkflowAlreadyExistsException;
 import com.orchex.app.workflow.definition.model.WorkflowDefinition;
 import com.orchex.app.workflow.definition.dto.CreateWorkflowRequest;
 import com.orchex.app.workflow.definition.mapper.WorkflowMapper;
@@ -17,6 +18,10 @@ public class WorkflowDefinitionService {
     private final WorkflowMapper workflowMapper;
 
     public WorkflowDefinition createWorkflow(CreateWorkflowRequest dto) {
+        if (workflowDefinitionRepository.existsByName(dto.getName())) {
+            throw new WorkflowAlreadyExistsException("Workflow with name '" + dto.getName() + "' already exists");
+        }
+
         WorkflowDefinition workflow = workflowMapper.toEntity(dto);
         return workflowDefinitionRepository.save(workflow);
     }
