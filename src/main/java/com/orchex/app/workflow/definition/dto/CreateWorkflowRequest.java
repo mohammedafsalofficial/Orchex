@@ -1,5 +1,6 @@
 package com.orchex.app.workflow.definition.dto;
 
+import com.orchex.app.workflow.definition.validation.ValidWorkflow;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
+@ValidWorkflow
 public class CreateWorkflowRequest {
 
     @NotBlank(message = "Workflow name must not be empty")
@@ -22,5 +24,5 @@ public class CreateWorkflowRequest {
 
     @NotEmpty(message = "Workflow must contain at least one task")
     @Valid
-    private List<TaskDefinitionRequest> tasks;
+    private List<@NotNull(message = "Task cannot be null") TaskDefinitionRequest> tasks;
 }
