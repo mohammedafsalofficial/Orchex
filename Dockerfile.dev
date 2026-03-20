@@ -1,15 +1,6 @@
 FROM maven:3.9.6-eclipse-temurin-17
 WORKDIR /app
-
-# Copy pom.xml and download dependencies first (cached layer)
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Source is mounted as a volume at runtime — not copied here
-EXPOSE 8080
-
-# poll-interval/quiet-period: DevTools uses polling inside Docker
-# (filesystem events are unreliable across volume mounts on most OSes)
-ENTRYPOINT ["mvn", "spring-boot:run", \
-  "-Dspring-boot.run.fork=false", \
-  "-Dspring-boot.run.jvmArguments=-Dspring.devtools.restart.poll-interval=2000 -Dspring.devtools.restart.quiet-period=1000"]
+EXPOSE 8080 35729
+COPY docker-entrypoint.dev.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

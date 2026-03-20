@@ -3,6 +3,8 @@ package com.orchex.app.workflow.definition.dto;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class TaskDefinitionRequest {
 
@@ -21,5 +23,9 @@ public class TaskDefinitionRequest {
 
     @NotNull(message = "Timeout is required")
     @Min(value = 1, message = "Timeout must be greater than 0")
+    @Max(value = 86400, message = "Timeout cannot exceed 24 hours")
     private Integer timeoutSeconds;
+
+    // Added dependencies for cycle validation
+    private List<@NotBlank(message = "Dependency task name must not be blank") String> dependencies;
 }

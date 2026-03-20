@@ -1,6 +1,6 @@
 package com.orchex.app.workflow.definition.controller;
 
-import com.orchex.app.common.util.ApiResponse;
+import com.orchex.app.common.util.ApiSuccessResponse;
 import com.orchex.app.common.util.ResponseUtil;
 import com.orchex.app.workflow.definition.model.WorkflowDefinition;
 import com.orchex.app.workflow.definition.dto.CreateWorkflowRequest;
@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/workflows")
@@ -25,7 +26,7 @@ public class WorkflowDefinitionController {
     private final WorkflowMapper workflowMapper;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<WorkflowResponse>> createWorkflow(
+    public ResponseEntity<ApiSuccessResponse<WorkflowResponse>> createWorkflow(
             @Valid @RequestBody CreateWorkflowRequest createWorkflowRequest,
             HttpServletRequest httpRequest) {
         WorkflowDefinition createdWorkflow = workflowDefinitionService.createWorkflow(createWorkflowRequest);
@@ -36,7 +37,7 @@ public class WorkflowDefinitionController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<WorkflowResponse>>> getAllWorkflows(HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiSuccessResponse<List<WorkflowResponse>>> getAllWorkflows(HttpServletRequest httpRequest) {
         List<WorkflowDefinition> workflows = workflowDefinitionService.getAllWorkflows();
         List<WorkflowResponse> response = workflows.stream()
                 .map(workflowMapper::toResponse)
@@ -44,5 +45,14 @@ public class WorkflowDefinitionController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseUtil.success(response, "Workflows fetched successfully.", httpRequest.getRequestURI()));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiSuccessResponse<WorkflowResponse>> getWorkflowById(HttpServletRequest request, @PathVariable UUID id) {
+        WorkflowDefinition workflow = workflowDefinitionService.getWorkflowById(id);
+        WorkflowResponse response = workflowMapper.toResponse(workflow);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseUtil.success(response, "Workflow fetch successfully for id: " + id, request.getRequestURI()));
     }
 }
