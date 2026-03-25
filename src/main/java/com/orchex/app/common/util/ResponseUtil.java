@@ -26,6 +26,7 @@ public class ResponseUtil {
             int status
     ) {
         return ApiErrorResponse.builder()
+                .success(false)
                 .timestamp(LocalDateTime.now())
                 .status(status)
                 .errorCode(errorCode)

@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 public class ApiErrorResponse {
 
+    private boolean success;
     private LocalDateTime timestamp;
     private int status;
     private ErrorCode errorCode;
