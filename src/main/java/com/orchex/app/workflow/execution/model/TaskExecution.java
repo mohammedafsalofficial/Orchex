@@ -1,5 +1,6 @@
 package com.orchex.app.workflow.execution.model;
 
+import com.orchex.app.workflow.definition.model.TaskDefinition;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +27,10 @@ public class TaskExecution {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workflow_execution_id", nullable = false)
     private WorkflowExecution workflowExecution;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_definition_id", nullable = false)
+    private TaskDefinition taskDefinition;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
