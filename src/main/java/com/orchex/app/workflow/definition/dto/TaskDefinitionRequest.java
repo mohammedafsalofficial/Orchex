@@ -12,10 +12,6 @@ public class TaskDefinitionRequest {
     @Size(max = 100, message = "Task name cannot exceed 100 characters")
     private String name;
 
-    @NotNull(message = "Step order is required")
-    @Min(value = 1, message = "Step order must be >= 1")
-    private Integer stepOrder;
-
     @NotNull(message = "Retry limit is required")
     @Min(value = 0, message = "Retry limit cannot be negative")
     @Max(value = 10, message = "Retry limit cannot exceed 10")
@@ -26,6 +22,12 @@ public class TaskDefinitionRequest {
     @Max(value = 86400, message = "Timeout cannot exceed 24 hours")
     private Integer timeoutSeconds;
 
-    // Added dependencies for cycle validation
+    @Size(max = 5000, message = "Config JSON too large")
+    private String configJson;
+
+    /**
+     * Names of tasks that must complete before this task can run.
+     * Empty/null means this is a root task.
+     */
     private List<@NotBlank(message = "Dependency task name must not be blank") String> dependencies;
 }

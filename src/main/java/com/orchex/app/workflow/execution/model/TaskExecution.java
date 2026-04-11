@@ -54,6 +54,12 @@ public class TaskExecution {
     @Column(columnDefinition = "TEXT")
     private String outputPayload;
 
+    /** Populated when the task fails after all retries are exhausted. */
+    @Column(columnDefinition = "TEXT")
+    private String errorMessage;
+
+    private LocalDateTime completedAt;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();

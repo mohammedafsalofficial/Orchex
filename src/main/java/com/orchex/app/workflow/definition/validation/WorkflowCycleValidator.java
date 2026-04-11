@@ -16,74 +16,125 @@ public class WorkflowCycleValidator implements ConstraintValidator<ValidWorkflow
 
     @Override
     public boolean isValid(CreateWorkflowRequest dto, ConstraintValidatorContext context) {
-        if (dto.getTasks() == null) return true;
+        if (dto == null || dto.getTasks() == null || dto.getTasks().isEmpty()) return true;
 
-        Map<String, List<String>> graph = new HashMap<>();
+        context.disableDefaultConstraintViolation();
+
         Set<String> taskNames = new HashSet<>();
+        List<String> errors = new ArrayList<>();
 
-        // Check for duplicate task names
+        collectNamesAndCheckDuplicates(dto, taskNames, errors);
+
+        Map<String, List<String>> adjList = new HashMap<>();
+        Map<String, Integer> inDegree = new HashMap<>();
+
+        buildGraph(dto, taskNames, adjList, inDegree, errors);
+
+        if (!errors.isEmpty()) return fail(context, errors);
+
+        return detectCycle(taskNames, adjList, inDegree, context);
+    }
+
+    /**
+     * Collect task names and detect duplicates
+     */
+    private void collectNamesAndCheckDuplicates(
+            CreateWorkflowRequest dto,
+            Set<String> taskNames,
+            List<String> errors
+    ) {
         for (TaskDefinitionRequest task : dto.getTasks()) {
-            String taskName = task.getName();
-            if (!taskNames.add(taskName)) {
-                return fail(context, "Duplicate task name found: " + taskName);
+            if (task.getName() == null) continue;
+            if (!taskNames.add(task.getName())) {
+                errors.add("Duplicate task name: '" + task.getName() + "'");
             }
-            graph.put(taskName, new ArrayList<>());
+        }
+    }
+
+    /**
+     * Validate dependency references, detect self-deps, build graph
+     */
+    private void buildGraph(
+            CreateWorkflowRequest dto,
+            Set<String> taskNames,
+            Map<String, List<String>> adjList,
+            Map<String, Integer> inDegree,
+            List<String> errors
+    ) {
+        for (String name : taskNames) {
+            adjList.put(name, new ArrayList<>());
+            inDegree.put(name, 0);
         }
 
-        // Validate dependencies reference existing tasks, then build graph
         for (TaskDefinitionRequest task : dto.getTasks()) {
-            String taskName = task.getName();
-            List<String> dependencies = task.getDependencies();
+            if (task.getName() == null || task.getDependencies() == null) continue;
 
-            if (dependencies != null) {
-                for (String dependency : dependencies) {
-                    if (!taskNames.contains(dependency)) {
-                        return fail(context,
-                                String.format("Task '%s' depends on unknown task '%s'", taskName, dependency));
-                    }
+            for (String dep : task.getDependencies()) {
+                if (dep == null) continue;
+
+                if (dep.equals(task.getName())) {
+                    errors.add("Task '" + task.getName() + "' depends on itself");
+                    continue;
                 }
-                graph.get(taskName).addAll(dependencies);
+
+                if (!taskNames.contains(dep)) {
+                    errors.add("Task '" + task.getName() + "' depends on unknown task '" + dep + "'");
+                    continue;
+                }
+
+                // Forward edge: dep → task (dep must complete before task runs)
+                adjList.get(dep).add(task.getName());
+                inDegree.merge(task.getName(), 1, Integer::sum);
+            }
+        }
+    }
+
+    /**
+     * Cycle detection via Kahn's algorithm (BFS topological sort)
+     */
+    private boolean detectCycle(
+            Set<String> taskNames,
+            Map<String, List<String>> adjList,
+            Map<String, Integer> inDegree,
+            ConstraintValidatorContext context
+    ) {
+        Queue<String> queue = new ArrayDeque<>();
+        for (Map.Entry<String, Integer> entry : inDegree.entrySet()) {
+            if (entry.getValue() == 0) queue.add(entry.getKey());
+        }
+
+        int processed = 0;
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            processed++;
+
+            for (String dependent : adjList.get(current)) {
+                int remaining = inDegree.merge(dependent, -1, Integer::sum);
+                if (remaining == 0) queue.add(dependent);
             }
         }
 
-        // Detect cycle using DFS
-        Set<String> visiting = new HashSet<>();
-        Set<String> visited = new HashSet<>();
-
-        for (String node : graph.keySet()) {
-            if (hasCycle(node, graph, visiting, visited)) {
-                return fail(context, "Workflow contains cyclic dependency involving task: " + node);
+        if (processed != taskNames.size()) {
+            Set<String> cycleNodes = new LinkedHashSet<>();
+            for (Map.Entry<String, Integer> entry : inDegree.entrySet()) {
+                if (entry.getValue() > 0) cycleNodes.add(entry.getKey());
             }
+            return fail(context, List.of("Circular dependency detected among tasks: " + cycleNodes));
         }
 
         return true;
     }
 
-    private boolean hasCycle(
-            String node,
-            Map<String, List<String>> graph,
-            Set<String> visiting,
-            Set<String> visited
-    ) {
-        if (visited.contains(node)) return false;
-        if (visiting.contains(node)) return true;
+    // --- Failure helpers ---
 
-        visiting.add(node);
-
-        for (String neighbor : graph.getOrDefault(node, Collections.emptyList())) {
-            if (hasCycle(neighbor, graph, visiting, visited)) {
-                return true;
-            }
-        }
-
-        visiting.remove(node);
-        visited.add(node);
-
+    private boolean fail(ConstraintValidatorContext context, List<String> errors) {
+        errors.forEach(msg ->
+                context.buildConstraintViolationWithTemplate(msg).addConstraintViolation()
+        );
         return false;
     }
 
     private boolean fail(ConstraintValidatorContext context, String message) {
-        context.disableDefaultConstraintViolation();
         context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
         return false;
     }
