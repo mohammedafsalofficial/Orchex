@@ -1,5 +1,6 @@
 package com.orchex.app.workflow.definition.exception;
 
+import com.orchex.app.common.exception.ErrorCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 

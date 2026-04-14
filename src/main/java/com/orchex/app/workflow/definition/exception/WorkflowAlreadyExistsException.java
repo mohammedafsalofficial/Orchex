@@ -1,5 +1,6 @@
 package com.orchex.app.workflow.definition.exception;
 
+import com.orchex.app.common.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;

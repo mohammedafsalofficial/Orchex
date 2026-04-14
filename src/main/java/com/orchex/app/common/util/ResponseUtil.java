@@ -1,6 +1,6 @@
 package com.orchex.app.common.util;
 
-import com.orchex.app.workflow.definition.exception.ErrorCode;
+import com.orchex.app.common.exception.ErrorCode;
 
 import java.time.LocalDateTime;
 import java.util.List;

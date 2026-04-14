@@ -1,7 +1,7 @@
 package com.orchex.app.workflow.handler;
 
 import com.orchex.app.workflow.definition.exception.AppException;
-import com.orchex.app.workflow.definition.exception.ErrorCode;
+import com.orchex.app.common.exception.ErrorCode;
 import com.orchex.app.workflow.definition.model.TaskType;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;

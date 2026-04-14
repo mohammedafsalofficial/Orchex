@@ -1,5 +1,6 @@
 package com.orchex.app.workflow.definition.dto;
 
+import com.orchex.app.workflow.definition.model.TaskType;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -11,6 +12,9 @@ public class TaskDefinitionRequest {
     @NotBlank(message = "Task name must not be empty")
     @Size(max = 100, message = "Task name cannot exceed 100 characters")
     private String name;
+
+    @NotNull(message = "Task type must be specified")
+    private TaskType taskType;
 
     @NotNull(message = "Retry limit is required")
     @Min(value = 0, message = "Retry limit cannot be negative")

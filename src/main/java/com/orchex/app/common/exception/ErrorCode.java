@@ -1,4 +1,4 @@
-package com.orchex.app.workflow.definition.exception;
+package com.orchex.app.common.exception;
 
 public enum ErrorCode {
 
