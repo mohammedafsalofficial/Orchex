@@ -60,6 +60,8 @@ public class TaskExecution {
 
     private LocalDateTime completedAt;
 
+    private LocalDateTime nextRetryAt;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
