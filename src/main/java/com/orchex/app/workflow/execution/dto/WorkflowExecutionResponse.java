@@ -12,7 +12,7 @@ import java.util.UUID;
 public class WorkflowExecutionResponse {
 
     private UUID id;
-    private UUID workflowId;
+    private UUID workflowDefinitionId;
     private WorkflowStatus status;
     private String correlationId;
     private String triggeredBy;
