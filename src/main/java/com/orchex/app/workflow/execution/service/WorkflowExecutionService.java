@@ -5,6 +5,7 @@ import com.orchex.app.workflow.definition.model.WorkflowDefinition;
 import com.orchex.app.workflow.definition.repository.WorkflowDefinitionRepository;
 import com.orchex.app.workflow.engine.service.WorkflowEngineService;
 import com.orchex.app.workflow.execution.event.WorkflowStartedEvent;
+import com.orchex.app.workflow.execution.exception.WorkflowExecutionNotFoundException;
 import com.orchex.app.workflow.execution.mapper.WorkflowExecutionMapper;
 import com.orchex.app.workflow.execution.model.WorkflowExecution;
 import com.orchex.app.workflow.execution.model.WorkflowStatus;
@@ -42,5 +43,10 @@ public class WorkflowExecutionService {
         applicationEventPublisher.publishEvent(new WorkflowStartedEvent(workflowExecution.getId()));
 
         return workflowExecution;
+    }
+
+    public WorkflowExecution getWorkflowExecution(UUID executionId) {
+        return workflowExecutionRepository.findById(executionId)
+                .orElseThrow(() -> new WorkflowExecutionNotFoundException(executionId));
     }
 }
