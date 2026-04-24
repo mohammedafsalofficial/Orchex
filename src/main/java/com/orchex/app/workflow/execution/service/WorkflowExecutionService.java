@@ -12,6 +12,7 @@ import com.orchex.app.workflow.execution.repository.WorkflowExecutionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ public class WorkflowExecutionService {
     private final WorkflowExecutionMapper workflowExecutionMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    @Transactional
     public WorkflowExecution startWorkflow(UUID workflowId, String triggeredBy) {
         WorkflowDefinition workflowDefinition = workflowDefinitionRepository.findById(workflowId)
                 .orElseThrow(() -> new WorkflowNotFoundException(workflowId));

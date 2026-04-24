@@ -9,6 +9,7 @@ import com.orchex.app.workflow.execution.repository.WorkflowExecutionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +56,7 @@ public class TaskExecutionRunner {
         checkWorkflowCompletion(taskExecution.getWorkflowExecution().getId());
     }
 
+    @Transactional
     public void triggerRunnableTasks(UUID workflowExecutionId) {
         List<TaskExecution> taskExecutions = taskExecutionRepository
                 .findByWorkflowExecutionId(workflowExecutionId);

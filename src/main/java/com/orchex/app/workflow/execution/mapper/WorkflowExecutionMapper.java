@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface WorkflowExecutionMapper {
 
-    @Mapping(target = "workflowId", source = "workflowDefinition.id")
+    @Mapping(target = "workflowDefinitionId", source = "workflowDefinition.id")
     WorkflowExecutionResponse toResponse(WorkflowExecution execution);
 
     @Mapping(target = "id", ignore = true)
