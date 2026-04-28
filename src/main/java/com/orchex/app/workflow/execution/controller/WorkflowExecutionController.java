@@ -4,6 +4,7 @@ import com.orchex.app.common.util.ApiSuccessResponse;
 import com.orchex.app.common.util.ResponseUtil;
 import com.orchex.app.workflow.execution.dto.StartWorkflowRequest;
 import com.orchex.app.workflow.execution.dto.WorkflowExecutionResponse;
+import com.orchex.app.workflow.execution.dto.WorkflowExecutionStatusResponse;
 import com.orchex.app.workflow.execution.mapper.WorkflowExecutionMapper;
 import com.orchex.app.workflow.execution.model.WorkflowExecution;
 import com.orchex.app.workflow.execution.service.WorkflowExecutionService;
@@ -37,5 +38,17 @@ public class WorkflowExecutionController {
                 workflowExecutionResponse, "Workflow execution started successfully", request.getRequestURI());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responsePayload);
+    }
+
+    @GetMapping("/executions/{executionId}")
+    public ResponseEntity<ApiSuccessResponse<WorkflowExecutionStatusResponse>> getWorkflowExecution(
+            @PathVariable UUID executionId,
+            HttpServletRequest request) {
+        WorkflowExecution workflowExecution = workflowExecutionService.getWorkflowExecution(executionId);
+        WorkflowExecutionStatusResponse workflowExecutionStatusResponse = workflowExecutionMapper.toStatusResponse(workflowExecution);
+        ApiSuccessResponse<WorkflowExecutionStatusResponse> responsePayload =
+                ResponseUtil.success(workflowExecutionStatusResponse, "Workflow execution fetched successfully", request.getRequestURI());
+
+        return ResponseEntity.ok(responsePayload);
     }
 }
