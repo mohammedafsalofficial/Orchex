@@ -41,6 +41,18 @@ services:
       timeout: 5s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: orchex_pgadmin_dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@orchex.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      GUNICORN_ACCESS_LOGFILE: /dev/null  # ← suppresses access logs
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:
   maven_cache:
