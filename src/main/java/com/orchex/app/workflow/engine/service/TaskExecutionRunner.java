@@ -8,7 +8,9 @@ import com.orchex.app.workflow.execution.repository.TaskExecutionRepository;
 import com.orchex.app.workflow.execution.repository.WorkflowExecutionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +57,7 @@ public class TaskExecutionRunner {
         checkWorkflowCompletion(taskExecution.getWorkflowExecution().getId());
     }
 
+    @Transactional
     public void triggerRunnableTasks(UUID workflowExecutionId) {
         List<TaskExecution> taskExecutions = taskExecutionRepository
                 .findByWorkflowExecutionId(workflowExecutionId);
@@ -66,10 +69,14 @@ public class TaskExecutionRunner {
             boolean ready = dependencies.isEmpty() ||
                     dependencies.stream().allMatch(dep -> isTaskCompleted(taskExecutions, dep));
 
-            if (ready) {
+            if (ready && readyToRetry(taskExecution)) {
                 executeTaskAsync(taskExecution.getId());
             }
         }
+    }
+
+    private boolean readyToRetry(TaskExecution taskExecution) {
+        return taskExecution.getNextRetryAt() == null || taskExecution.getNextRetryAt().isBefore(LocalDateTime.now());
     }
 
     private void checkWorkflowCompletion(UUID workflowExecutionId) {
@@ -96,8 +103,15 @@ public class TaskExecutionRunner {
                 : taskExecution.getTaskDefinition().getRetryLimit();
 
         if (retries < maxRetries) {
-            taskExecution.setRetryCount(retries + 1);
+            int nextRetry = retries + 1;
+
+            taskExecution.setRetryCount(nextRetry);
             taskExecution.setStatus(TaskStatus.PENDING);
+
+            long delaySeconds = calculateBackoff(nextRetry);
+
+            taskExecution.setNextRetryAt(LocalDateTime.now().plusSeconds(delaySeconds));
+
             taskExecutionRepository.save(taskExecution);
         } else {
             taskExecution.setStatus(TaskStatus.FAILED);
@@ -111,6 +125,11 @@ public class TaskExecutionRunner {
         }
     }
 
+    private long calculateBackoff(int retryCount) {
+        long delay = (long) (Math.pow(2, retryCount) * 5);
+        return Math.min(delay, 300);
+    }
+
     private boolean isTaskCompleted(List<TaskExecution> taskExecutions, String name) {
         return taskExecutions.stream()
                 .anyMatch(t -> t.getTaskDefinition().getName().equals(name)
@@ -120,5 +139,16 @@ public class TaskExecutionRunner {
     private void simulate(String name) throws InterruptedException {
         System.out.println("Executing: " + name);
         Thread.sleep(1000);
+    }
+
+    @Scheduled(fixedDelay = 5000)
+    public void retryPendingTasks() {
+        List<TaskExecution> taskExecutions = taskExecutionRepository.findAllByStatus(TaskStatus.PENDING);
+
+        for (TaskExecution taskExecution : taskExecutions) {
+            if (readyToRetry(taskExecution)) {
+                triggerRunnableTasks(taskExecution.getWorkflowExecution().getId());
+            }
+        }
     }
 }
