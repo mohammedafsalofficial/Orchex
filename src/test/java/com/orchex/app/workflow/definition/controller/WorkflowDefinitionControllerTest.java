@@ -1,4 +1,4 @@
-package com.orchex.app.workflow.definition;
+package com.orchex.app.workflow.definition.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orchex.app.workflow.definition.dto.CreateWorkflowRequest;
