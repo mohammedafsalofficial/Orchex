@@ -11,7 +11,8 @@ import java.util.UUID;
 @Table(name = "task_executions", indexes = {
         @Index(name = "idx_task_execution_status", columnList = "status"),
         @Index(name = "idx_task_execution_workflow", columnList = "workflow_execution_id"),
-        @Index(name = "idx_task_execution_worker", columnList = "workerId")
+        @Index(name = "idx_task_execution_worker", columnList = "workerId"),
+        @Index(name = "idx_task_execution_status_next_retry", columnList = "status, nextRetryAt")
 })
 @Getter
 @Setter
