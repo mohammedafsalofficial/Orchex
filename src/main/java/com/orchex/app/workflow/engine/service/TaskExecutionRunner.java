@@ -1,5 +1,7 @@
 package com.orchex.app.workflow.engine.service;
 
+import com.orchex.app.workflow.execution.exception.TaskExecutionNotFoundException;
+import com.orchex.app.workflow.execution.exception.WorkflowExecutionNotFoundException;
 import com.orchex.app.workflow.execution.model.TaskExecution;
 import com.orchex.app.workflow.execution.model.TaskStatus;
 import com.orchex.app.workflow.execution.model.WorkflowExecution;
@@ -29,7 +31,7 @@ public class TaskExecutionRunner {
     @Async
     public void executeTaskAsync(UUID taskExecutionId) {
         TaskExecution taskExecution = taskExecutionRepository.findById(taskExecutionId)
-                .orElseThrow(() -> new RuntimeException("Task execution not found for id: " + taskExecutionId));
+                .orElseThrow(() -> new TaskExecutionNotFoundException(taskExecutionId));
         executeTask(taskExecution);
     }
 
@@ -88,7 +90,7 @@ public class TaskExecutionRunner {
         if (allCompleted) {
             WorkflowExecution workflowExecution = workflowExecutionRepository
                     .findById(workflowExecutionId)
-                    .orElseThrow(() -> new RuntimeException("Workflow execution not found: " + workflowExecutionId));
+                    .orElseThrow(() -> new WorkflowExecutionNotFoundException(workflowExecutionId));
 
             workflowExecution.setStatus(WorkflowStatus.COMPLETED);
             workflowExecution.setCompletedAt(LocalDateTime.now());
@@ -133,11 +135,6 @@ public class TaskExecutionRunner {
         return taskExecutions.stream()
                 .anyMatch(t -> t.getTaskDefinition().getName().equals(name)
                         && t.getStatus() == TaskStatus.COMPLETED);
-    }
-
-    private void simulate(String name) throws InterruptedException {
-        System.out.println("Executing: " + name);
-        Thread.sleep(1000);
     }
 
     @Scheduled(fixedDelay = 5000)
