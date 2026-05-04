@@ -8,6 +8,7 @@ import com.orchex.app.workflow.execution.repository.TaskExecutionRepository;
 import com.orchex.app.workflow.execution.repository.WorkflowExecutionRepository;
 import com.orchex.app.workflow.handler.TaskHandlerRegistry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -141,12 +142,8 @@ public class TaskExecutionRunner {
 
     @Scheduled(fixedDelay = 5000)
     public void retryPendingTasks() {
-        List<TaskExecution> taskExecutions = taskExecutionRepository.findAllByStatus(TaskStatus.PENDING);
-
-        for (TaskExecution taskExecution : taskExecutions) {
-            if (readyToRetry(taskExecution)) {
-                triggerRunnableTasks(taskExecution.getWorkflowExecution().getId());
-            }
-        }
+        taskExecutionRepository
+                .findAllByStatusAndNextRetryAtBefore(TaskStatus.PENDING, LocalDateTime.now(), PageRequest.of(0, 50))
+                .forEach(task -> triggerRunnableTasks(task.getWorkflowExecution().getId()));
     }
 }
