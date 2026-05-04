@@ -4,7 +4,9 @@ import com.orchex.app.workflow.definition.model.TaskDefinition;
 import com.orchex.app.workflow.definition.model.TaskType;
 import com.orchex.app.workflow.execution.model.TaskExecution;
 import com.orchex.app.workflow.handler.TaskHandler;
+import org.springframework.stereotype.Component;
 
+@Component
 public class HttpTaskHandler implements TaskHandler {
 
     @Override
