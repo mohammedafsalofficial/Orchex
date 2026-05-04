@@ -44,9 +44,15 @@ public class WorkflowEngineService {
     }
 
     private TaskExecution createTaskExecution(WorkflowExecution workflowExecution, TaskDefinition taskDefinition) {
-        return TaskExecution.builder()
+        TaskExecution taskExecution = TaskExecution.builder()
                 .workflowExecution(workflowExecution)
                 .taskDefinition(taskDefinition)
                 .build();
+
+        if (taskDefinition.getDependencies().isEmpty()) {
+            taskExecution.setInputPayload(workflowExecution.getInputPayload());
+        }
+
+        return taskExecution;
     }
 }

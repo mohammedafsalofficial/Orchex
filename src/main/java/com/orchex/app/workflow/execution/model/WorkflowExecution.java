@@ -48,6 +48,9 @@ public class WorkflowExecution {
     @Column(columnDefinition = "TEXT")
     private String errorMessage;
 
+    @Column(columnDefinition = "TEXT")
+    private String inputPayload;
+
     // e.g. "USER", "SCHEDULER", "API"
     @Column(nullable = false)
     private String triggeredBy;

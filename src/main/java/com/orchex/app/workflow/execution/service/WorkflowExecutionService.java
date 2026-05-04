@@ -27,7 +27,7 @@ public class WorkflowExecutionService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public WorkflowExecution startWorkflow(UUID workflowId, String triggeredBy) {
+    public WorkflowExecution startWorkflow(UUID workflowId, String triggeredBy, String inputPayload) {
         WorkflowDefinition workflowDefinition = workflowDefinitionRepository.findById(workflowId)
                 .orElseThrow(() -> new WorkflowNotFoundException(workflowId));
 
@@ -36,6 +36,7 @@ public class WorkflowExecutionService {
 
         workflowExecution.setStatus(WorkflowStatus.PENDING);
         workflowExecution.setTriggeredBy(triggeredBy);
+        workflowExecution.setInputPayload(inputPayload);
         workflowExecution.setCorrelationId(UUID.randomUUID().toString());
 
         workflowExecutionRepository.save(workflowExecution);
