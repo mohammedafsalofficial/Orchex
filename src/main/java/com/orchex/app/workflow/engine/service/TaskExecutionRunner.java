@@ -6,6 +6,7 @@ import com.orchex.app.workflow.execution.model.WorkflowExecution;
 import com.orchex.app.workflow.execution.model.WorkflowStatus;
 import com.orchex.app.workflow.execution.repository.TaskExecutionRepository;
 import com.orchex.app.workflow.execution.repository.WorkflowExecutionRepository;
+import com.orchex.app.workflow.handler.TaskHandlerRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
@@ -23,6 +24,7 @@ public class TaskExecutionRunner {
 
     private final TaskExecutionRepository taskExecutionRepository;
     private final WorkflowExecutionRepository workflowExecutionRepository;
+    private final TaskHandlerRegistry taskHandlerRegistry;
 
     @Async
     public void executeTaskAsync(UUID taskExecutionId) {
@@ -37,13 +39,9 @@ public class TaskExecutionRunner {
         taskExecutionRepository.save(taskExecution);
 
         try {
-            switch (taskExecution.getTaskDefinition().getTaskType()) {
-                case HTTP -> simulate("HTTP task");
-                case WORKER -> simulate("Worker task");
-                case SCRIPT -> simulate("Script task");
-                case DATABASE -> simulate("DB task");
-                case EVENT -> simulate("Event task");
-            }
+            taskHandlerRegistry
+                    .getHandler(taskExecution.getTaskDefinition().getTaskType())
+                    .execute(taskExecution, taskExecution.getTaskDefinition());
             taskExecution.setStatus(TaskStatus.COMPLETED);
         } catch (Exception ex) {
             handleFailure(taskExecution, ex);
