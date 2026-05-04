@@ -145,7 +145,7 @@ public class TaskExecutionRunner {
     @Scheduled(fixedDelay = 5000)
     public void retryPendingTasks() {
         taskExecutionRepository
-                .findAllByStatusAndNestRetryAtBefore(TaskStatus.PENDING, LocalDateTime.now(), PageRequest.of(0, 50))
+                .findAllByStatusAndNextRetryAtBefore(TaskStatus.PENDING, LocalDateTime.now(), PageRequest.of(0, 50))
                 .forEach(task -> triggerRunnableTasks(task.getWorkflowExecution().getId()));
     }
 }

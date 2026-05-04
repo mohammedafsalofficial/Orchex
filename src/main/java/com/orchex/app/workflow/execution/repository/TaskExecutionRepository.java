@@ -14,5 +14,5 @@ public interface TaskExecutionRepository extends JpaRepository<TaskExecution, UU
 
     List<TaskExecution> findByWorkflowExecutionId(UUID workflowExecutionId);
 
-    Page<TaskExecution> findAllByStatusAndNestRetryAtBefore(TaskStatus status, LocalDateTime now, Pageable pageable);
+    Page<TaskExecution> findAllByStatusAndNextRetryAtBefore(TaskStatus status, LocalDateTime now, Pageable pageable);
 }
