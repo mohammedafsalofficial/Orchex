@@ -38,6 +38,7 @@ public interface WorkflowExecutionMapper {
     @Mapping(target = "startedAt", ignore = true)
     @Mapping(target = "completedAt", ignore = true)
     @Mapping(target = "errorMessage", ignore = true)
+    @Mapping(target = "inputPayload", ignore = true)
     @Mapping(target = "taskExecutions", ignore = true)
     @Mapping(target = "workflowDefinition", source = "definition")
     WorkflowExecution fromDefinition(WorkflowDefinition definition);
