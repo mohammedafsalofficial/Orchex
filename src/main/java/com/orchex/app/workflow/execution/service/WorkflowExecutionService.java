@@ -6,6 +6,7 @@ import com.orchex.app.workflow.definition.repository.WorkflowDefinitionRepositor
 import com.orchex.app.workflow.engine.service.WorkflowEngineService;
 import com.orchex.app.workflow.execution.event.WorkflowStartedEvent;
 import com.orchex.app.workflow.execution.exception.WorkflowExecutionNotFoundException;
+import com.orchex.app.workflow.execution.exception.WorkflowTriggerException;
 import com.orchex.app.workflow.execution.mapper.WorkflowExecutionMapper;
 import com.orchex.app.workflow.execution.model.WorkflowExecution;
 import com.orchex.app.workflow.execution.model.WorkflowStatus;
@@ -30,6 +31,9 @@ public class WorkflowExecutionService {
     public WorkflowExecution startWorkflow(UUID workflowId, String triggeredBy) {
         WorkflowDefinition workflowDefinition = workflowDefinitionRepository.findById(workflowId)
                 .orElseThrow(() -> new WorkflowNotFoundException(workflowId));
+
+        if (workflowDefinition.getTasks().isEmpty())
+            throw new WorkflowTriggerException(workflowId, "Workflow has no tasks defined");
 
         WorkflowExecution workflowExecution = workflowExecutionMapper
                 .fromDefinition(workflowDefinition);
