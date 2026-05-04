@@ -30,7 +30,11 @@ public class WorkflowExecutionController {
             @PathVariable UUID workflowId,
             @Valid @RequestBody StartWorkflowRequest requestPayload,
             HttpServletRequest request) {
-        WorkflowExecution workflowExecution = workflowExecutionService.startWorkflow(workflowId, requestPayload.getTriggeredBy());
+        WorkflowExecution workflowExecution = workflowExecutionService.startWorkflow(
+                workflowId,
+                requestPayload.getTriggeredBy(),
+                requestPayload.getInputPayload()
+        );
 
         WorkflowExecutionResponse workflowExecutionResponse = workflowExecutionMapper.toResponse(workflowExecution);
 
