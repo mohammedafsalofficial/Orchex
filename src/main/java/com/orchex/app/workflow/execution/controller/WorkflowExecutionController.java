@@ -37,7 +37,7 @@ public class WorkflowExecutionController {
         ApiSuccessResponse<WorkflowExecutionResponse> responsePayload = ResponseUtil.success(
                 workflowExecutionResponse, "Workflow execution started successfully", request.getRequestURI());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(responsePayload);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(responsePayload);
     }
 
     @GetMapping("/executions/{executionId}")
