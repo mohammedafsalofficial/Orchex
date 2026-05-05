@@ -8,14 +8,19 @@ import com.orchex.app.workflow.execution.event.WorkflowStartedEvent;
 import com.orchex.app.workflow.execution.exception.WorkflowExecutionNotFoundException;
 import com.orchex.app.workflow.execution.exception.WorkflowTriggerException;
 import com.orchex.app.workflow.execution.mapper.WorkflowExecutionMapper;
+import com.orchex.app.workflow.execution.model.TaskExecution;
+import com.orchex.app.workflow.execution.model.TaskStatus;
 import com.orchex.app.workflow.execution.model.WorkflowExecution;
 import com.orchex.app.workflow.execution.model.WorkflowStatus;
+import com.orchex.app.workflow.execution.repository.TaskExecutionRepository;
 import com.orchex.app.workflow.execution.repository.WorkflowExecutionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,6 +31,7 @@ public class WorkflowExecutionService {
     private final WorkflowExecutionRepository workflowExecutionRepository;
     private final WorkflowExecutionMapper workflowExecutionMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final TaskExecutionRepository taskExecutionRepository;
 
     @Transactional
     public WorkflowExecution startWorkflow(UUID workflowId, String triggeredBy, String inputPayload) {
@@ -53,5 +59,31 @@ public class WorkflowExecutionService {
     public WorkflowExecution getWorkflowExecution(UUID executionId) {
         return workflowExecutionRepository.findById(executionId)
                 .orElseThrow(() -> new WorkflowExecutionNotFoundException(executionId));
+    }
+
+    public WorkflowExecution cancelWorkflow(UUID workflowExecutionId) {
+        WorkflowExecution workflowExecution = workflowExecutionRepository.findById(workflowExecutionId)
+                .orElseThrow(() -> new WorkflowExecutionNotFoundException(workflowExecutionId));
+
+        if (workflowExecution.getStatus() == WorkflowStatus.COMPLETED ||
+                workflowExecution.getStatus() == WorkflowStatus.CANCELLED ||
+                workflowExecution.getStatus() == WorkflowStatus.FAILED ||
+                workflowExecution.getStatus() == WorkflowStatus.TIMED_OUT) {
+            throw new IllegalStateException("Cannot cancel workflow in state: " + workflowExecution.getStatus());
+        }
+
+        workflowExecution.setStatus(WorkflowStatus.CANCELLED);
+        workflowExecution.setCompletedAt(LocalDateTime.now());
+
+        List<TaskExecution> taskExecutions = taskExecutionRepository.findByWorkflowExecutionId(workflowExecutionId);
+
+        for (TaskExecution taskExecution : taskExecutions) {
+            if (taskExecution.getStatus() == TaskStatus.RUNNING || taskExecution.getStatus() == TaskStatus.PENDING) {
+                taskExecution.setStatus(TaskStatus.CANCELLED);
+            }
+        }
+
+        taskExecutionRepository.saveAll(taskExecutions);
+        return workflowExecutionRepository.save(workflowExecution);
     }
 }
