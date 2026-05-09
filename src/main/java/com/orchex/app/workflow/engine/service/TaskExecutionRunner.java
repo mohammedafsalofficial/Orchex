@@ -8,6 +8,7 @@ import com.orchex.app.workflow.execution.model.WorkflowExecution;
 import com.orchex.app.workflow.execution.model.WorkflowStatus;
 import com.orchex.app.workflow.execution.repository.TaskExecutionRepository;
 import com.orchex.app.workflow.execution.repository.WorkflowExecutionRepository;
+import com.orchex.app.workflow.execution.service.WorkflowExecutionService;
 import com.orchex.app.workflow.handler.TaskHandlerRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -27,15 +28,25 @@ public class TaskExecutionRunner {
     private final TaskExecutionRepository taskExecutionRepository;
     private final WorkflowExecutionRepository workflowExecutionRepository;
     private final TaskHandlerRegistry taskHandlerRegistry;
+    private final WorkflowExecutionService workflowExecutionService;
 
     @Async
     public void executeTaskAsync(UUID taskExecutionId) {
         TaskExecution taskExecution = taskExecutionRepository.findById(taskExecutionId)
                 .orElseThrow(() -> new TaskExecutionNotFoundException(taskExecutionId));
+
+        if (!workflowExecutionService.isWorkflowActive(taskExecution.getWorkflowExecution())) {
+            return;
+        }
+
         executeTask(taskExecution);
     }
 
     public void executeTask(TaskExecution taskExecution) {
+        if (!workflowExecutionService.isWorkflowActive(taskExecution.getWorkflowExecution())) {
+            return;
+        }
+
         taskExecution.setStatus(TaskStatus.RUNNING);
         taskExecution.setStartedAt(LocalDateTime.now());
         taskExecutionRepository.save(taskExecution);
@@ -44,6 +55,11 @@ public class TaskExecutionRunner {
             taskHandlerRegistry
                     .getHandler(taskExecution.getTaskDefinition().getTaskType())
                     .execute(taskExecution, taskExecution.getTaskDefinition());
+
+            if (!workflowExecutionService.isWorkflowActive(taskExecution.getWorkflowExecution())) {
+                return;
+            }
+
             taskExecution.setStatus(TaskStatus.COMPLETED);
         } catch (Exception ex) {
             handleFailure(taskExecution, ex);
@@ -60,6 +76,13 @@ public class TaskExecutionRunner {
 
     @Transactional
     public void triggerRunnableTasks(UUID workflowExecutionId) {
+        WorkflowExecution workflowExecution = workflowExecutionRepository.findById(workflowExecutionId)
+                .orElseThrow(() -> new WorkflowExecutionNotFoundException(workflowExecutionId));
+
+        if (!workflowExecutionService.isWorkflowActive(workflowExecution)) {
+            return;
+        }
+
         List<TaskExecution> taskExecutions = taskExecutionRepository
                 .findByWorkflowExecutionId(workflowExecutionId);
 
@@ -81,6 +104,14 @@ public class TaskExecutionRunner {
     }
 
     private void checkWorkflowCompletion(UUID workflowExecutionId) {
+        WorkflowExecution workflowExecution = workflowExecutionRepository
+                .findById(workflowExecutionId)
+                .orElseThrow(() -> new WorkflowExecutionNotFoundException(workflowExecutionId));
+
+        if (!workflowExecutionService.isWorkflowActive(workflowExecution)) {
+            return;
+        }
+
         List<TaskExecution> taskExecutions = taskExecutionRepository
                 .findByWorkflowExecutionId(workflowExecutionId);
 
@@ -88,10 +119,6 @@ public class TaskExecutionRunner {
                 .allMatch(t -> t.getStatus() == TaskStatus.COMPLETED);
 
         if (allCompleted) {
-            WorkflowExecution workflowExecution = workflowExecutionRepository
-                    .findById(workflowExecutionId)
-                    .orElseThrow(() -> new WorkflowExecutionNotFoundException(workflowExecutionId));
-
             workflowExecution.setStatus(WorkflowStatus.COMPLETED);
             workflowExecution.setCompletedAt(LocalDateTime.now());
             workflowExecutionRepository.save(workflowExecution);
@@ -99,6 +126,10 @@ public class TaskExecutionRunner {
     }
 
     private void handleFailure(TaskExecution taskExecution, Exception ex) {
+        if (!workflowExecutionService.isWorkflowActive(taskExecution.getWorkflowExecution())) {
+            return;
+        }
+
         int retries = taskExecution.getRetryCount();
         int maxRetries = taskExecution.getTaskDefinition().getRetryLimit() == null ? 0
                 : taskExecution.getTaskDefinition().getRetryLimit();
