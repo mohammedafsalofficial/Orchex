@@ -86,8 +86,4 @@ public class WorkflowExecutionService {
         taskExecutionRepository.saveAll(taskExecutions);
         return workflowExecutionRepository.save(workflowExecution);
     }
-
-    public boolean isWorkflowActive(WorkflowExecution workflowExecution) {
-        return workflowExecution.getStatus() == WorkflowStatus.PENDING || workflowExecution.getStatus() == WorkflowStatus.RUNNING;
-    }
 }

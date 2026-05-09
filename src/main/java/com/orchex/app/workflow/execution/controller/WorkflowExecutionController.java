@@ -55,4 +55,17 @@ public class WorkflowExecutionController {
 
         return ResponseEntity.ok(responsePayload);
     }
+
+    @PostMapping("/executions/{workflowExecutionId}/cancel")
+    public ResponseEntity<ApiSuccessResponse<WorkflowExecutionResponse>> cancelWorkflow(
+            @PathVariable UUID workflowExecutionId,
+            HttpServletRequest request) {
+        WorkflowExecution workflowExecution = workflowExecutionService.cancelWorkflow(workflowExecutionId);
+
+        WorkflowExecutionResponse workflowExecutionResponse = workflowExecutionMapper.toResponse(workflowExecution);
+        ApiSuccessResponse<WorkflowExecutionResponse> responsePayload =
+                ResponseUtil.success(workflowExecutionResponse, "Workflow execution cancelled successfully", request.getRequestURI());
+
+        return ResponseEntity.ok(responsePayload);
+    }
 }
