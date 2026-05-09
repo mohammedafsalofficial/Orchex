@@ -7,6 +7,7 @@ import com.orchex.app.workflow.execution.model.WorkflowExecution;
 import com.orchex.app.workflow.execution.model.WorkflowStatus;
 import com.orchex.app.workflow.execution.repository.TaskExecutionRepository;
 import com.orchex.app.workflow.execution.repository.WorkflowExecutionRepository;
+import com.orchex.app.workflow.execution.service.WorkflowExecutionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +23,16 @@ public class WorkflowEngineService {
     private final WorkflowExecutionRepository workflowExecutionRepository;
     private final TaskExecutionRepository taskExecutionRepository;
     private final TaskExecutionRunner taskExecutionRunner;
+    private final WorkflowExecutionService workflowExecutionService;
 
     @Transactional
     public void executeAsync(UUID workflowExecutionId) {
         WorkflowExecution workflowExecution = workflowExecutionRepository.findById(workflowExecutionId)
                 .orElseThrow(() -> new WorkflowExecutionNotFoundException(workflowExecutionId));
+
+        if (!workflowExecutionService.isWorkflowActive(workflowExecution)) {
+            return;
+        }
 
         if (workflowExecution.getTaskExecutions() == null || workflowExecution.getTaskExecutions().isEmpty()) {
             List<TaskExecution> taskExecutions = workflowExecution.getWorkflowDefinition()
