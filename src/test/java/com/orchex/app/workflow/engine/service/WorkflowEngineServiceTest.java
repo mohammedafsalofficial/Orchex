@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,6 +51,7 @@ class WorkflowEngineServiceTest {
                 .id(executionId)
                 .workflowDefinition(workflowDefinition)
                 .inputPayload("{\"orderId\":\"ord-123\"}")
+                .status(WorkflowStatus.PENDING)
                 .build();
 
         when(workflowExecutionRepository.findById(executionId)).thenReturn(Optional.of(workflowExecution));
@@ -72,6 +74,27 @@ class WorkflowEngineServiceTest {
                 .extracting(TaskExecution::getInputPayload)
                 .isNull();
         assertThat(workflowExecution.getStatus()).isEqualTo(WorkflowStatus.RUNNING);
+    }
+
+    @Test
+    void shouldNotStartCancelledWorkflowExecution() {
+        UUID executionId = UUID.randomUUID();
+        WorkflowDefinition workflowDefinition = WorkflowDefinition.builder()
+                .tasks(List.of(task("fetch-order", List.of())))
+                .build();
+        WorkflowExecution workflowExecution = WorkflowExecution.builder()
+                .id(executionId)
+                .workflowDefinition(workflowDefinition)
+                .status(WorkflowStatus.CANCELLED)
+                .build();
+
+        when(workflowExecutionRepository.findById(executionId)).thenReturn(Optional.of(workflowExecution));
+
+        workflowEngineService.executeAsync(executionId);
+
+        verify(taskExecutionRepository, never()).saveAll(org.mockito.ArgumentMatchers.anyList());
+        verify(workflowExecutionRepository, never()).save(workflowExecution);
+        assertThat(workflowExecution.getStatus()).isEqualTo(WorkflowStatus.CANCELLED);
     }
 
     private TaskDefinition task(String name, List<String> dependencies) {
